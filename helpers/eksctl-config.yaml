@@ -1,61 +1,50 @@
 kind: ClusterConfig
 apiVersion: eksctl.io/v1alpha5
 metadata:
-  name: sandbox
-  version: "1.21"
-  region: us-east-1
-availabilityZones:
-  - us-east-1a
-  - us-east-1b
-  - us-east-1c
-iam:
-  withOIDC: true
-  serviceAccounts:
-    - metadata:
-        name: cluster-autoscaler
-        namespace: kube-system
-      wellKnownPolicies:
-        autoScaler: true
-      roleName: sandbox-autoscaler-role
-    - metadata:
-        name: aws-load-balancer-controller
-        namespace: aws-system
-      wellKnownPolicies:
-        awsLoadBalancerController: true
-      roleName: sandbox-lb-controller-role
-    - metadata:
-        name: aws-cloudwatch-agent
-        namespace: aws-system
-      attachPolicyARNs:
-        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-      roleName: sandbox-cloudwatch-metrics
-    - metadata:
-        name: aws-fluent-bit
-        namespace: aws-system
-      attachPolicyARNs:
-        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-      roleName: sandbox-fluent-bit
-addons:
-  - name: vpc-cni
-    version: latest
-  - name: kube-proxy
-    version: latest
-  - name: coredns
-    version: latest
-gitops:
-  flux:
-    gitProvider: github
-    flags:
-      owner: <YOUR GH USERNAME>
-      repository: eks-fluxcd-bootstrap
-      branch: demo
-      path: ./clusters/sandbox/
-      namespace: flux-system
-managedNodeGroups:
-  - name: sandbox-amd64-workers
-    instanceType: m5.large
-    desiredCapacity: 3
-    minSize: 2
-    maxSize: 5
-    privateNetworking: true
+  name: "josh-cluster"
+  region: "us-west-2"
+  version: "1.20"
+  tags:
+    "Name": "josh-cluster"
+    "creator": "josh.lee"
+    "protected": "weekend"
 
+vpc:
+  nat:
+    gateway: Single
+  subnets:
+    private:
+      us-west-2a:
+        id: subnet-09545f79a52f59825
+      us-west-2b:
+        id: subnet-0df0c7239150dd441
+      us-west-2c:
+        id: subnet-067d25b121cf77310
+    public: {}
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+
+nodeGroups:
+- name: linux-default
+  privateNetworking: true
+  amiFamily: AmazonLinux2
+  spotOcean: {}
+
+cloudwatch:
+  clusterLogging:
+    enableTypes:
+      - "api"
+      - "audit"
+      - "authenticator"
+
+addons:
+  gitops:
+    flux:
+      gitProvider: github
+      flags:
+        owner: joshdlee
+        repository: eks-fluxcd-bootstrap
+        branch: main
+        path: ./clusters/josh-cluster/
+        namespace: flux-system
