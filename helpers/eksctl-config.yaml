@@ -3,9 +3,8 @@ apiVersion: eksctl.io/v1alpha5
 metadata:
   name: "josh-cluster"
   region: "us-west-2"
-  version: "1.20"
+  version: "1.21"
   tags:
-    "Name": "josh-cluster"
     "creator": "josh.lee"
     "protected": "weekend"
 
@@ -37,14 +36,19 @@ cloudwatch:
       - "api"
       - "audit"
       - "authenticator"
-
 addons:
-  gitops:
-    flux:
-      gitProvider: github
-      flags:
-        owner: joshdlee
-        repository: eks-fluxcd-bootstrap
-        branch: main
-        path: ./clusters/josh-cluster/
-        namespace: flux-system
+  - name: vpc-cni
+    version: latest
+  - name: kube-proxy
+    version: latest
+  - name: coredns
+    version: latest
+gitops:
+  flux:
+    gitProvider: github
+    flags:
+      owner: joshdlee
+      repository: eks-fluxcd-bootstrap
+      branch: main
+      path: ./clusters/josh-cluster/
+      namespace: flux-system
